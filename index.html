@@ -293,10 +293,11 @@ body {
 .quiz-footer {
   background: var(--surface);
   border-top: 1px solid var(--border);
-  padding: 16px 20px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 .score-mini {
   font-size: 13px;
@@ -304,8 +305,32 @@ body {
 }
 .score-mini span { color: var(--accent2); font-weight: 600; }
 
+.footer-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-prev {
+  padding: 10px 18px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text2);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-prev:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.btn-prev:disabled { opacity: 0.25; cursor: default; }
+
 .btn-next {
-  padding: 11px 28px;
+  padding: 10px 22px;
   background: var(--accent);
   border: none;
   border-radius: var(--radius);
@@ -315,10 +340,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.18s;
-  opacity: 0;
-  pointer-events: none;
 }
-.btn-next.visible { opacity: 1; pointer-events: auto; }
 .btn-next:hover { background: var(--accent2); transform: translateX(2px); }
 
 /* ─── RESULT SCREEN ─── */
@@ -493,26 +515,68 @@ body {
 }
 .timeout-sub { color: var(--text2); font-size: 14px; margin-bottom: 24px; }
 
-/* ─── NAV DOTS ─── */
-.nav-dots-wrap {
-  padding: 8px 20px 4px;
+/* ─── QUESTION GRID (bottom nav) ─── */
+.qgrid-wrap {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px 14px;
+}
+.qgrid-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 8px;
+}
+.qgrid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
   max-width: 720px;
   margin: 0 auto;
 }
-.nav-dots {
-  display: flex; flex-wrap: wrap; gap: 4px;
-}
-.nav-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--border);
+.qgrid-cell {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
+  user-select: none;
 }
-.nav-dot.answered { background: var(--accent); }
-.nav-dot.current { background: var(--accent2); transform: scale(1.4); }
-.nav-dot.correct-dot { background: #4caf50; }
-.nav-dot.wrong-dot { background: #f44336; }
+.qgrid-cell:hover:not(.gc-current) {
+  border-color: rgba(201,168,76,0.5);
+  color: var(--accent);
+}
+.qgrid-cell.gc-current {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0d0f14;
+  transform: scale(1.08);
+  box-shadow: 0 2px 8px rgba(201,168,76,0.4);
+}
+.qgrid-cell.gc-answered {
+  background: rgba(201,168,76,0.15);
+  border-color: rgba(201,168,76,0.5);
+  color: var(--accent2);
+}
+.qgrid-cell.gc-correct {
+  background: rgba(76,175,80,0.2);
+  border-color: #4caf50;
+  color: #81c784;
+}
+.qgrid-cell.gc-wrong {
+  background: rgba(244,67,54,0.2);
+  border-color: #f44336;
+  color: #ef9a9a;
+}
 
 @media (max-width: 480px) {
   .welcome-card { padding: 32px 22px; }
@@ -520,6 +584,9 @@ body {
   .stats-row { grid-template-columns: 1fr 1fr 1fr; }
   .quiz-logo { display: none; }
   .quiz-body { padding: 18px 14px; }
+  .qgrid { grid-template-columns: repeat(10, 1fr); gap: 3px; }
+  .qgrid-cell { font-size: 10px; border-radius: 4px; }
+  .btn-prev, .btn-next { padding: 9px 14px; font-size: 13px; }
 }
 </style>
 </head>
@@ -574,15 +641,19 @@ body {
       <span class="timer-val" id="timer-display">50:00</span>
     </div>
   </div>
-  <div class="nav-dots-wrap">
-    <div class="nav-dots" id="nav-dots"></div>
-  </div>
   <div class="quiz-body" id="quiz-body">
     <!-- questions rendered here -->
   </div>
+  <div class="qgrid-wrap">
+    <div class="qgrid-label">Suallar</div>
+    <div class="qgrid" id="qgrid"></div>
+  </div>
   <div class="quiz-footer">
     <div class="score-mini">Düzgün: <span id="live-score">0</span> / <span id="live-total">0</span></div>
-    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Növbəti →</button>
+    <div class="footer-nav">
+      <button class="btn-prev" id="btn-prev" onclick="prevQuestion()" disabled>← Əvvəlki</button>
+      <button class="btn-next" id="btn-next" onclick="nextQuestion()">Növbəti →</button>
+    </div>
   </div>
 </div>
 
@@ -676,19 +747,20 @@ function startQuiz() {
   quizFinished = false;
 
   showScreen('quiz-screen');
-  buildNavDots();
+  buildQGrid();
   renderQuestion();
   startTimer();
 }
 
-function buildNavDots() {
-  const wrap = document.getElementById('nav-dots');
+function buildQGrid() {
+  const wrap = document.getElementById('qgrid');
   wrap.innerHTML = '';
   for (let i = 0; i < 50; i++) {
     const d = document.createElement('div');
-    d.className = 'nav-dot' + (i === 0 ? ' current' : '');
+    d.className = 'qgrid-cell' + (i === 0 ? ' gc-current' : '');
     d.setAttribute('onclick', 'jumpTo(' + i + ')');
-    d.id = 'dot-' + i;
+    d.id = 'gc-' + i;
+    d.textContent = i + 1;
     wrap.appendChild(d);
   }
 }
@@ -697,17 +769,23 @@ function jumpTo(idx) {
   if (quizFinished) return;
   currentIdx = idx;
   renderQuestion();
-  updateDots();
+  updateGrid();
 }
 
-function updateDots() {
+function updateGrid() {
   for (let i = 0; i < 50; i++) {
-    const d = document.getElementById('dot-' + i);
+    const d = document.getElementById('gc-' + i);
     if (!d) continue;
-    d.className = 'nav-dot';
-    if (i === currentIdx) d.className += ' current';
-    else if (userAnswers[i] !== null) d.className += ' answered';
+    d.className = 'qgrid-cell';
+    if (i === currentIdx) {
+      d.className += ' gc-current';
+    } else if (userAnswers[i] !== null) {
+      d.className += ' gc-answered';
+    }
   }
+  // Scroll current cell into view inside the grid
+  const cur = document.getElementById('gc-' + currentIdx);
+  if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'center' });
 }
 
 function renderQuestion() {
@@ -752,13 +830,13 @@ function renderQuestion() {
     '<div class="options-list">' + optHtml + '</div>' +
     fbHtml;
 
+  // Prev button
+  const prevBtn = document.getElementById('btn-prev');
+  prevBtn.disabled = (currentIdx === 0);
+
+  // Next button
   const nextBtn = document.getElementById('btn-next');
-  if (answered) {
-    nextBtn.classList.add('visible');
-    nextBtn.textContent = currentIdx < 49 ? 'Növbəti →' : '🏁 Bitir';
-  } else {
-    nextBtn.classList.remove('visible');
-  }
+  nextBtn.textContent = currentIdx < 49 ? 'Növbəti →' : '🏁 Bitir';
 
   const answered2 = userAnswers.filter(a => a !== null).length;
   document.getElementById('live-score').textContent = correctCount;
@@ -779,15 +857,23 @@ function selectAnswer(optIdx) {
   const chosen = q.shuffledOptions[optIdx];
   userAnswers[currentIdx] = chosen;
   if (chosen === q.correct) correctCount++;
-  updateDots();
+  updateGrid();
   renderQuestion();
+}
+
+function prevQuestion() {
+  if (currentIdx > 0) {
+    currentIdx--;
+    renderQuestion();
+    updateGrid();
+  }
 }
 
 function nextQuestion() {
   if (currentIdx < 49) {
     currentIdx++;
     renderQuestion();
-    updateDots();
+    updateGrid();
   } else {
     endQuiz();
   }
